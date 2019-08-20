@@ -1,0 +1,135 @@
+---
+title: "Prediction Intervals in Meta-Analysis"
+author: "Fernando E. Miguez"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Prediction Intervals in Meta-Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lme4)
+library(predintma)
+library(ggplot2)
+```
+
+# Prediction
+
+The topic of prediction has gained considerable attention in the field of statistics and meta-analysis is no exception. Perhaps the most important practical benefit of a prediciton interval in meta-analysis is that it encapsulates information about the between-trial variability and it complements information about the point estimate. In contrast, the magnitude of the between-trial variance is difficult to interpret in isolation and the inability to capture the between-trial variance has been a topic of intense debate. When the estimate is zero (or close) the argument is that a "fixed" model is more appropriate, but the interpretation and usefulness of a prediction interval in this case is questionable. The "random-effects" model is assumed to always be the "correct" model, but not every dataset supports this type of model. Providing prediciton intervals in meta-analysis relfects a more accurate representation about whether the drug, treatment or intervention will be effective in future environments or for other experimental units not in our sample.
+
+## What is a prediction interval?
+
+Let's define it:
+
+An interval that will contain a future observation (i.e. not part of our sample) with a given level of miscoverage (say 5 or 10%), given our observed data.
+
+Very wide intervals have a high probability of containing the future observation but are likely to be impractically wide for decision making. Intervals that are too narrow and do not have nominal coverage give us an illusion of precision and certainty which might not hold true in the long run.
+
+A prediction interval (https://en.wikipedia.org/wiki/Prediction_interval) is not a new idea and it goes back to the tradition of Gosset, Fisher and Neyman (Shafer and Vovk, 2008). 
+
+### Mathematical definition
+
+Given a sample ($X_1, X_2, X_3, ..., X_n$) we want an interval that will contain $X_{n+1}$ with probability ($1 - \alpha$, where $\alpha \in (0,1)$). The level of miscoverage ($\alpha$) is typically 0.05 or 0.10. It is common to suppose that $X$ needs to meet the assumption of identically and indepenednently distributed (iid) and Gaussian, but this can be relaxed. 
+
+# Classes supported
+
+There is substantial material on this topic here: https://femiguez.github.io/paf/
+
+Classes supported:
+
+* 'numeric': **pred_int_tdist** and **pred_int_conformal**
+* 'data.frame': **pred_int_metafor** and **pred_int_mcg_ntrial**
+* 'MCMCglmm': **pred_int_mcg_tdist** (method 'tdist'), 
+              **pred_int** (method = 'mcmc'),
+              **pred_int** (method = 'simulate'),
+              **pred_int** (merthod = 'predict')
+* 'lmerMod': **pred_int** (method = 'tdist'),
+             **pred_int** (method = 'boot'),
+             **pred_int** (method = 'tdist2')
+             
+All of these methods can be accessed through the interface 'pred_int'
+
+## A variable from a single distribution
+
+If we want a prediction interval for a new observation ($Y_{n+1}$) after a sample of 
+$Y_1,Y_2,Y_3,...,Y_n$ we can use the following functions.
+
+```{r predint-numeric-class}
+y <- rnorm(50)
+## Using the t-distribution
+pdi.t <- pred_int_tdist(y)
+pdi.t
+## or pdi.t <- pred_int(y)
+## Using conformal inference
+pdi.c <- pred_int_conformal(y)
+pdi.c
+## or pdi.c <- pred_int(y, method = "conformal")
+## Compare this with quantiles
+y.quant <- quantile(y, probs = c(0.5, 0.025, 0.975))
+y.quant
+```
+
+## A data frame with the proper structure
+
+If we have a data set with the proper structure with a response variable a 'trial' variable and 'reps' within trials we can use the functions that work with data.frames
+
+Let's first visualize the data
+```{r soyrs}
+data(soyrs)
+soyrs.s <- tsum(soyrs, var.names = c("lrr", "Trial_ID"))
+
+ggplot(data = soyrs.s, aes(x = m, y = id)) + 
+  geom_point() + xlab("log RR") + ylab("ID") +
+  geom_vline(xintercept = 0)
+```
+
+Now we can calculate prediction intervals
+
+```{r soyrs-pdi}
+pdi.mf <- pred_int(soyrs, method = "metafor", var.names = c("TRT1_Yld","TRT2_Yld","Trial_ID"))
+pdi.mf
+pdi.mcg <- pred_int(soyrs, method = "ntrial", var.names = c("lrr", "Trial_ID"))
+pdi.mcg
+```
+
+Alternatively, we can fit a model first using 'lme4' and then calcualte prediction intervals.
+
+```{r soyrs-lmer}
+soy.lmm <- lmer(lrr ~ 1 + (1|Trial_ID), data = soyrs)
+pdi.lm1 <- pred_int(soy.lmm, method = "tdist")
+pdi.lm1
+pdi.lm2 <- pred_int(soy.lmm, method = "boot")
+pdi.lm2
+pdi.lm3 <- pred_int(soy.lmm, method = "tdist2")
+pdi.lm3
+```
+
+It is also possible to change the method used for degrees of freedom.
+
+```{r soyrs-lmer-degfr}
+pdi.lm4 <- pred_int(soy.lmm, method = "tdist", degfr = "kr")
+pdi.lm4
+pdi.lm5 <- pred_int(soy.lmm, method = "tdist", degfr = "zdist") ## or 'Inf'
+pdi.lm5
+```
+
+## Defining a Random-Effects Meta-analysis model
+
+Random effects models are a way of incorporating the effect of 'trial' but with an imposed distribution. Commonly it is assumed that they are normally distributed but other options are possible.
+
+$$
+y_{ij} = \mu + \theta_i + e_{ij} 
+$$
+
+### Literature (TODO)
+
+# Related R packages
+
+Basically anything that starts with [pred]
+
+* predictionInterval
+* prediction
+* 
