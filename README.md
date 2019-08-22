@@ -1,5 +1,4 @@
-# predintma: an R package for calculating prediction intervals in
-#  random effect meta-analysis
+# predintma: an R package for calculating prediction intervals in random effect meta-analysis
 
 To install:
 
