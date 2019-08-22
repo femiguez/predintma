@@ -5,7 +5,7 @@
 \title{Prediction interval for a 'numeric' based on conformal inference}
 \usage{
 pred_int_conformal(x, neval = 200, level = 0.95,
-  point.pred = c("median", "mean"))
+  point.pred = c("mean", "median"))
 }
 \arguments{
 \item{x}{should be an object of class "numeric"}
@@ -14,7 +14,7 @@ pred_int_conformal(x, neval = 200, level = 0.95,
 
 \item{level}{coverage level with default 0.95}
 
-\item{point.pred}{point prediction either 'median' or 'mean'}
+\item{point.pred}{point prediction either 'mean' or 'median'}
 }
 \value{
 a prediction interval
@@ -35,6 +35,30 @@ pdi.t <- pred_int_tdist(x)
 pdi.c <- pred_int_conformal(x)
 ## Not really a prediction interval, but related
 pdi.q <- quantile(x, probs = c(0.5, 0.025, 0.975))
+
+## Following example from the link above
+set.seed(12345)
+n <- 1000
+U <- rnorm(n)
+hist(U)
+u <- 2 ## New proposed value
+Ua <- c(U,u) ## Augmented set
+hist(Ua)
+abline(v=u)
+print(round(mean(Ua > u), 3))
+nEval <- 200
+u.candidate <- seq(from=min(U), to=max(U), length = nEval)
+Cbounds <- c(u.candidate[match(5, apply(as.matrix(u.candidate),
+                                        1,
+                                       function(x){floor(2.5+100*(mean(c(U, x) < x)))}))],
+            rev(u.candidate)[match(95, rev(apply(as.matrix(u.candidate),
+                                                 1,
+                                                 function(x){ceiling(-2.5+100*(mean(c(U, x) < x)))})))])
+print(Cbounds)
+hist(U)
+abline(v = Cbounds)
+## Alternatively
+pdi.cb <- pred_int_conformal(U)
 }
 
 

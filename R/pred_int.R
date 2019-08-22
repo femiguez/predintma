@@ -4,10 +4,10 @@
 #' and the between study uncertainty, but there is more to this...
 #' Implemented cases:
 #'
-#' object = numeric
-#' object = lmerMod
-#' object = MCMCglmm
-#' object = data.frame
+#' object = numeric \cr
+#' object = lmerMod \cr
+#' object = MCMCglmm \cr
+#' object = data.frame \cr
 #'
 #' For object = numeric the method is based on the 'lm' function
 #'
