@@ -36,14 +36,14 @@ pred_int_conformal_df <- function(x, method = "subsampling", level = 0.95,
   i.level <- 1 - alpha/neval.1
   ## set up dataset
   x2 <- x[,var.names]
-  names(x2) <- c("y","trial")
+  if(dim(x2)[2] != 2) stop("var.names might be wrong")
   ## do this 'neval' number of times
   pdi.c <- matrix(NA, ncol = 3, nrow = neval.1)
   for(i in 1:neval.1){
     sub.sample <- numeric(n.trials)
     k <- 1
     for(j in trials){
-      xs <- subset(x2, trial == j)[,"y"]
+      xs <- x2[x2[,2] == j,var.names[1]]
       sub.sample[k] <- sample(xs, size = 1)
       k <- k + 1
     }

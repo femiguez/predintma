@@ -105,6 +105,7 @@ pred_int_tdist <- function(x, level = 0.95, interval = c("prediction","confidenc
 #' @param level coverage level with default 0.95
 #' @param neval number of evaluations (default = 500)
 #' @param interval type of interval, by default is "prediction"
+#' @param var.names names of variables for response and 'trial'
 #' @return a prediction interval
 #' @seealso function 'pred_int_tdist_df'
 #' @details the prediction is at the mean of 'x'. Missing values are not allowed.
@@ -129,14 +130,14 @@ pred_int_tdist_df <- function(x, level = 0.95, neval = 500,
   i.level <- 1 - alpha/neval
   ## set up dataset
   x2 <- x[,var.names]
-  names(x2) <- c("y","trial")
+  if(dim(x2)[2] != 2) stop("var.names might be wrong")
   ## do this 'neval' number of times
   pdi.c <- matrix(NA, ncol = 3, nrow = neval)
   for(i in 1:neval){
     sub.sample <- numeric(n.trials)
     k <- 1
     for(j in trials){
-      xs <- subset(x2, trial == j)[,"y"]
+      xs <- x2[x2[,2] == j, var.names[1]]
       sub.sample[k] <- sample(xs, size = 1)
       k <- k + 1
     }
@@ -148,7 +149,6 @@ pred_int_tdist_df <- function(x, level = 0.95, neval = 500,
 
 #' Calculate prediction interval based on conformal inference. 
 #' 
-#' 
 #' @title Prediction interval for a 'numeric' based on conformal inference
 #' @name pred_int_conformal
 #' @description Conformal inference prediction interval for a numeric
@@ -157,6 +157,7 @@ pred_int_tdist_df <- function(x, level = 0.95, neval = 500,
 #' @param level coverage level with default 0.95
 #' @param point.pred point prediction either 'mean' or 'median'
 #' @param padding how much padding to add to the linear evaluation (default 0.0)
+#' @param method totally experimental either 'quantile' or 'deviation'
 #' @return a prediction interval
 #' @details I wrote this function after reading this tutorial: https://cdsamii.github.io/cds-demos/conformal/conformal-tutorial.html
 #' @export
@@ -181,12 +182,11 @@ pred_int_tdist_df <- function(x, level = 0.95, neval = 500,
 #' print(round(mean(Ua > u), 3))
 #' nEval <- 200
 #' u.candidate <- seq(from=min(U), to=max(U), length = nEval)
-#' Cbounds <- c(u.candidate[match(5, apply(as.matrix(u.candidate),
-#'                                         1,
-#'                                        function(x){floor(2.5+100*(mean(c(U, x) < x)))}))],
-#'             rev(u.candidate)[match(95, rev(apply(as.matrix(u.candidate),
-#'                                                  1,
-#'                                                  function(x){ceiling(-2.5+100*(mean(c(U, x) < x)))})))])
+#' Cbounds <- c(u.candidate[match(5, 
+#'                                  apply(as.matrix(u.candidate),1,
+#'                                  function(x){floor(2.5+100*(mean(c(U, x) < x)))}))],
+#'                                  rev(u.candidate)[match(95, rev(apply(as.matrix(u.candidate),1,
+#'                                  function(x){ceiling(-2.5+100*(mean(c(U, x) < x)))})))])
 #' print(Cbounds)
 #' hist(U)
 #' abline(v = Cbounds)
