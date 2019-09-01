@@ -33,6 +33,23 @@
 #' @source \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
 "soysff"
 
+#' Maize Foliar Fungicide
+#'
+#' A dataset containing the trial id, year, rep, yield of treatment, yield of control and the
+#' logarithm of the response ratio 
+#'
+#' @format A data frame with 703 rows and 6 variables:
+#' \describe{
+#'   \item{Trial_ID}{ -factor- given name for the specific trial.}
+#'   \item{Year}{ -integer- year that the trial was conducted.}
+#'   \item{Rep}{ -integer- rep number.}
+#'   \item{TRT_Yld}{ -numeric- yield for treated (fungicide Headline).}
+#'   \item{CTR_Yld}{ -numeric- yield for untreated (control).}
+#'   \item{lrr}{ -numeric- logarithm of the 'response ratio' i.e. log(TRT_Yld/CTR_Yld).}
+#' }
+#' @source \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
+"mzfg"
+
  #' Import packages needed for predintma to work correctly
  #' @import coda emmeans knitr lme4 metafor MCMCglmm stats
  NULL

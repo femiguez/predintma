@@ -45,6 +45,7 @@
 #' @param level coverage level with default 0.95
 #' @param nsim number of simulations for the 'boot' method.
 #' @param var.names variable names to be passed to the 'data.frame' methods
+#' @param formula formula interface for 'data.frame' methods
 #' @param ... arguments to be passed to a few of the functions
 #' @return a prediction interval for a "new_trial"
 #' @details TODO
@@ -68,7 +69,8 @@ pred_int <- function(x,
                      degfr = c("default","zdist","kr"),
                      level = 0.95,
                      nsim = 500,
-                     var.names = NULL, ...){
+                     var.names = NULL,
+                     formula = NULL,...){
   
   interval <- match.arg(interval)
   method <- match.arg(method)
@@ -100,7 +102,7 @@ pred_int <- function(x,
   }
   
   if(class(x) == "data.frame" && method == "ntrial"){
-    ans <- pred_int_mcg_ntrial(x, var.names = var.names, level = level)
+    ans <- pred_int_mcg_ntrial(formula = formula, data = x, level = level)
   }
   
   if(class(x) == "lmerMod" && method == "tdist"){

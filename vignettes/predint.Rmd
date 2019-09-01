@@ -101,7 +101,7 @@ Now we can calculate prediction intervals
 
 ```{r soyrs-pdi}
 pdi.mf <- pred_int(soyrs, method = "metafor", var.names = c("TRT1_Yld","TRT2_Yld","Trial_ID"))
-pdi.mcg <- pred_int(soyrs, method = "ntrial", var.names = c("lrr", "Trial_ID"))
+pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soyrs, method = "ntrial")
 pdi.t.df <- pred_int_tdist_df(soyrs, var.names = c("lrr", "Trial_ID"))
 ```
 
@@ -124,7 +124,7 @@ pdi.lm5 <- pred_int(soy.lmm, method = "tdist", degfr = "zdist") ## or 'Inf'
 Now I implemented the sub-sampling method for conformal prediction, which in this case, is distribution-free.
 
 ```{r conformal-trial-means}
-pdi.cf.df <- pred_int_conformal_df(soyrs, var.names = c("lrr","Trial_ID"))
+pdi.cf.df <- pred_int_conformal_df(soyrs, var.names = c("lrr","Trial_ID"), s.size = 3)
 ```
 
 Let's display the data for the different methods.
@@ -140,28 +140,88 @@ ggplot(data = cpdi, aes(x = fit, y = method)) +
   geom_point() + 
   geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.5)
 ```
+## Looking at a 'large' dataset
+
+This is an example where a foliar fungicide was applied.
+
+```{r mzfg}
+data(mzfg)
+## Remove one trial with just one rep
+mzfg <- subset(mzfg, Trial_ID != "ST2007236A")
+mzfg.s <- tsum(mzfg, var.names = c("lrr","Trial_ID"))
+
+ggplot(data = mzfg.s, aes(x = m, y = id)) + 
+  geom_point() + 
+  geom_errorbarh(aes(xmin = lb, xmax = ub)) + 
+  geom_vline(aes(xintercept = 0))
+```
+
+## Calculating prediction intervals 
+
+```{r mzfg-pdi}
+pdi.mf <- pred_int(mzfg, method = "metafor", var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
+pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = mzfg, method = "ntrial")
+pdi.t.df <- pred_int_tdist_df(mzfg, var.names = c("lrr", "Trial_ID"))
+```
+
+```{r mzfg-lmer}
+mz.lmm <- lmer(lrr ~ 1 + (1|Trial_ID), data = mzfg)
+pdi.lm1 <- pred_int(mz.lmm, method = "tdist")
+pdi.lm2 <- pred_int(mz.lmm, method = "boot")
+pdi.lm3 <- pred_int(mz.lmm, method = "tdist2")
+```
+
+```{r mzfg-lmer-degfr}
+pdi.lm4 <- pred_int(mz.lmm, method = "tdist", degfr = "kr")
+pdi.lm5 <- pred_int(mz.lmm, method = "tdist", degfr = "zdist") ## or 'Inf'
+pdi.cf.df <- pred_int_conformal_df(mzfg, var.names = c("lrr","Trial_ID"), s.size = 3)
+```
+
+```{r comb-pi-mzfg, echo = FALSE}
+methods <- c("metafor", "mcg-ntrial","tdist-df","lmer-tdist","lmer-boot","lmer-tdist2",
+             "lmer-tdist-kr","lmer-tdist-inf","conformal")
+cpdi <- data.frame(method = methods, 
+                   rbind(pdi.mf,pdi.mcg,pdi.t.df, 
+                         pdi.lm1,pdi.lm2,pdi.lm3,
+                         pdi.lm4,pdi.lm5,pdi.cf.df))
+kable(cpdi)
+ggplot(data = cpdi, aes(x = fit, y = method)) +
+  geom_point() + 
+  geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.5)
+```
+
 
 ## Comparing methods for a dataset which has a between-trial variance equal to zero
 
-How does it compare to the others? Conformal interval seems to be wider than the others.
+For this example I will use 90% prediction intervals as they are more stable than the 
+typical 95%.
+
+There are many models here that solve the problem in different ways. The conformal prediction interval has some advantages and disadvantages:
+
+1. It does not make assumptions about the underlying distribution ('distribution-free')
+2. It does not seem to work well for small sample sizes (n < 25)
+
+Because it does not make assumptions about an underlying model, the interval is wider, which makes sense. For small sample sizes it is not possible to construct a proper interval because the bounds end up being the upper and lower values of the sample ('minimum and maximum').
 
 ```{r soysff}
 data(soysff)
 ## Comparing methods
-pdi.mf <- pred_int(soysff, method = "metafor", var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
-pdi.mcg <- pred_int(soysff, method = "ntrial", var.names = c("lrr", "Trial_ID"))
-pdi.t.df <- pred_int_tdist_df(soysff, var.names = c("lrr", "Trial_ID"))
+pdi.mf <- pred_int(soysff, method = "metafor", level = 0.90,
+                   var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
+pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soysff, method = "ntrial", level = 0.90)
+pdi.t.df <- pred_int_tdist_df(soysff, level = 0.90,
+                              var.names = c("lrr", "Trial_ID"))
 soy.lmm <- lmer(lrr ~ 1 + (1|Trial_ID), data = soysff)
-pdi.lm1 <- pred_int(soy.lmm, method = "tdist")
-pdi.lm2 <- pred_int(soy.lmm, method = "boot")
-pdi.lm3 <- pred_int(soy.lmm, method = "tdist2")
-pdi.lm4 <- pred_int(soy.lmm, method = "tdist", degfr = "kr")
-pdi.lm5 <- pred_int(soy.lmm, method = "tdist", degfr = "zdist") ## or 'Inf'
+pdi.lm1 <- pred_int(soy.lmm, method = "tdist", level = 0.90)
+pdi.lm2 <- pred_int(soy.lmm, method = "boot", level = 0.90)
+pdi.lm3 <- pred_int(soy.lmm, method = "tdist2", level = 0.90)
+pdi.lm4 <- pred_int(soy.lmm, method = "tdist", degfr = "kr", level = 0.90)
+pdi.lm5 <- pred_int(soy.lmm, method = "tdist", degfr = "zdist", level = 0.90) ## or 'Inf'
 ## Bayesian methods
 prior1 <- list(R = list(V = 1, nu = 0.001), G = list(G1=list(V = 1, nu = 0.001)))
 soy.mcg <- MCMCglmm(lrr ~ 1, random = ~Trial_ID, data = soysff,
                     prior = prior1, pr = TRUE, verbose = FALSE)
-pdi.mcg1 <- pred_int(soy.mcg, method = "simulate")
+pdi.mcg1 <- pred_int(soy.mcg, method = "simulate", level = 0.90)
 methods <- c("metafor", "mcg-ntrial","lmer-tdist","lmer-boot","lmer-tdist2",
              "lmer-tdist-kr","lmer-tdist-inf","conformal","mcg-simulate",
              "tdist-df")
@@ -174,14 +234,6 @@ ggplot(data = cpdi, aes(x = fit, y = method)) +
   geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.5)
 ```
 
-
-
-
-
-## Example
-
-### Literature (TODO)
-
 # Related R packages
 
 Basically anything that starts with [pred]
@@ -192,7 +244,7 @@ Basically anything that starts with [pred]
 
 # TODO
 
-* Implement conformal prediction for a mixed model based on https://arxiv.org/abs/1809.07441
+* Implement new ideas, nothing seems to be working...
 
 # References
 
@@ -200,4 +252,4 @@ Basically anything that starts with [pred]
 
 * Lei et al. "Distribution-Free Predictive Inference for Regression". https://arxiv.org/abs/1604.04173
 
-* https://arxiv.org/abs/1809.07441
+* Dunn and Wasserman (2018) "Distribution-Free Prediction Sets with Random Effects". https://arxiv.org/abs/1809.07441

@@ -3,8 +3,8 @@
 #' @title Prediction interval for a data.frame using package 'MCMCglmm' and method 'ntrial'
 #' @name pred_int_mcg_ntrial
 #' @description Prediction interval for a data.frame using package 'MCMCglmm' and method 'ntrial'
-#' @param x should be an object of class "data.frame"
-#' @param var.names variable names for 'response' and 'id': c("y","trial") 
+#' @param formula an object of class formula with response ~ group
+#' @param data a data frame which contains the response and the grouping 
 #' @param level coverage level with default 0.95
 #' @return a prediction interval for a "new_trial"
 #' @details see function 'MCMCglmm' in package 'MCMCglmm'. The method adds an extra row to 
@@ -15,19 +15,23 @@
 #' \dontrun{
 #' ## Using soybean row spacing
 #' data(soyrs)
-#' pdi <- pred_int_mcg_ntrial(soyrs, var.names = c("lrr","Trial_ID"))
+#' pdi <- pred_int_mcg_ntrial(lrr ~ Trial_ID, data = soyrs)
 #' pdi 
 #' }
 #'
 #'
 
-pred_int_mcg_ntrial <- function(x, var.names = c("y","trial"), level = 0.95){
+pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   
-  if(class(x) != "data.frame") stop("only for data frames")
+  if(missing(data)) stop("data are missing")
+  if(class(data) != "data.frame") stop("only for data frames")
+  if(length(as.formula(formula)) != 3) stop("formula should be 'response' ~ 'trial'") 
+  
+  var.names <- all.vars(as.formula(formula))
   x <- subset(x, select = var.names)
-  trial.name <- var.names[2]
   resp.name <- var.names[1]
-  
+  trial.name <- var.names[2]
+
   ## Create "new trial"
   ndat <- data.frame(x[1,])
   ndat[,trial.name] <- "A_new_trial"

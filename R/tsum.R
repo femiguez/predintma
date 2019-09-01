@@ -12,6 +12,7 @@
 #' @param level coverage level with default 0.95
 #' @param order whether to order the summary by mean of response
 #' @param add.id whether to add the 'id' label
+#' @param formula alternative formula interface, if this is used 'var.names' is ignored.
 #' @return a data.frame with the indicated summaries
 #' @details this function is for somewhat of narrow use case, but similar things can be accomplished
 #' using 'tidyverse' type operations. It uses 'aggregate'.
@@ -31,11 +32,13 @@
 tsum <- function(x, var.names = c("y","trial"), 
                  method = c("ici","lm","min-max"),
                  level = 0.95, order = TRUE,
-                 add.id = TRUE){
+                 add.id = TRUE,
+                 formula = NULL){
   
   if(class(x) != "data.frame") stop("only for data.frames")
   
   method <- match.arg(method)
+  if(!missing(formula)) var.names <- all.vars(as.formula(formula))
   
   if(method == "ici"){
     ## Calcualte mean by trial
