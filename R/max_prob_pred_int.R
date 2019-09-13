@@ -7,7 +7,7 @@
 #' @param x should be a vector
 #' @param n number of evaluations to perform in the line search of probabilities
 #' @param neval number of evaluations in the conformal algorithm (see pred_int_conformal)
-#' @param tol tolerance default is 5 percent (0.05) see details
+#' @param tol tolerance default is (0.001) see details
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
 #' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
 #' @return a single value which represents a 'suggestion' for the maximum level of probability given the data
@@ -27,7 +27,7 @@
 #'
 #'
 
-max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.05, 
+max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001, 
                               method = c("tdist","conformal"),
                               m.method = c("quantile", "deviation")){
   
@@ -41,8 +41,6 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.05,
   x.max <- max(x)
   x.min <- min(x)
   
-  tol.dv <- (x.max - x.min) * tol
-    
   ans <- 0
   
   for(i in 1:n){
@@ -52,7 +50,7 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.05,
       pdi <- pred_int_conformal(x, neval = neval, method = m.method, level = prob.level[i])
     }
     dv <- abs(x.min - pdi[2]) + abs(x.max - pdi[3])
-    if(dv < tol.dv){
+    if(dv < tol){
       ans <- prob.level[i]
       break
     }
@@ -71,6 +69,8 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.05,
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
 #' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
 #' @param interval maximum and minimum values for the optimization search
+#' @param alpha.penalty whether to include a penalty for alpha
+#' @param scale whether to scale the input vector
 #' @return a single value which represents a 'suggestion' for the maximum level of probability given the data
 #' @details The idea is to find the maximum level of probability that will produce a conformal prediction interval
 #'          which matches the minimum and maximum values in the observed sample.  The distance is calculated as abs(x.min - calc.lower.bound) + abs(x.max - calc.upper.bound).
@@ -92,15 +92,37 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.05,
 #'
 opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
                                   m.method = c("quantile","deviation"),
-                                  interval = c(0,1)){
+                                  interval = c(0,1), alpha.penalty = 0,
+                                  scale = FALSE){
   
   method <- match.arg(method)
   m.method <- match.arg(m.method)
   
-  ans <- optimize(f = mpdi_obj, interval = interval, 
-                  x = x, method = method, m.method = m.method)
+  if(method == "tdist"){
+    ans <- optimize(f = mpdi_obj, interval = interval, 
+                    x = x, method = method, m.method = m.method)$minimum
+  }else{
+    ## It turns out that for the conformal method this optimization
+    ## problem is harder, but not that hard
+    ## First line-search the optimization function
+    alphas <- seq(0.05, 0.95, by = 0.05)
+    objf <- numeric(length(alphas))
+    for(i in 1:length(objf)){
+      objf[i] <- mpdi_obj(alphas[i], x = x, 
+                          method = method, m.method = m.method)
+    }
+    if(abs(max(objf) - min(objf)) < 0.001){
+      stop("objective function is flat. Can't optimize it.")
+    } 
+    alob <- data.frame(alpha = alphas, objfv = objf)
+    mm.alpha <- max(alob[alob$objfv == min(objf),"alpha"])
+    ans <- optimize(f = mpdi_obj, interval = c(mm.alpha-0.04,mm.alpha+0.04), 
+                    x = x, method = method, m.method = m.method,
+                    alpha.penalty = alpha.penalty,
+                    scale = scale)$minimum
+  }
   
-  return(1 - ans$minimum)
+  return(1 - ans)
 }
 
 #' Objective funciton for optimization
@@ -112,14 +134,36 @@ opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
 #' @param x a vector
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
 #' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
+#' @param alpha.penalty whether to include an alpha penalty (default 0 or 'no')
+#' @param scale whether to scale the input vector. This only makes sense if the alpha.penalty is different from zero. 
 #' @return a single value which represents a value that should be minimized
 #' @details The idea is to find the maximum level of probability that will produce a prediction interval
 #'          which matches the minimum and maximum values in the observed sample.  The distance is calculated as abs(x.min - calc.lower.bound) + abs(x.max - calc.upper.bound).
 #'          
 #' @export
-#' 
+#' @examples 
+#' \dontrun{
+#' set.seed(12345)
+#' x <- rnorm(10)
+#' alphas <- seq(0,1, 0.05)
+#' objf <- numeric(length(alphas))
+#' for(i in 1:length(objf)){
+#'   objf[i] <- mpdi_obj(alphas[i], x = x, method = "conformal")
+#' }
+#' qplot(alphas, objf, geom = "line")
+#' ## Trying the t-distribution
+#' y <- rt(10, df = 1)
+#' alphas <- seq(0,1, 0.05)
+#' objf <- numeric(length(alphas))
+#' for(i in 1:length(objf)){
+#'   objf[i] <- mpdi_obj(alphas[i], x = y, method = "conformal")
+#' }
+#' qplot(alphas, objf, geom = "line")
+#' }
+
 mpdi_obj <- function(alpha, x, method = c("tdist","conformal"),
-                     m.method = c("quantile","deviation")){
+                     m.method = c("quantile","deviation"),
+                     alpha.penalty=0, scale = FALSE){
   
   method <- match.arg(method)
   m.method <- match.arg(m.method)
@@ -127,7 +171,7 @@ mpdi_obj <- function(alpha, x, method = c("tdist","conformal"),
   ## for the minimization
   ## Component 1 is simply alpha
   level <- 1 - alpha
-  x <- scale(x)[,1]
+  if(scale) x <- scale(x)[,1]
   ## Component two is the deviation
   x.max <- max(x)
   x.min <- min(x)
@@ -138,7 +182,7 @@ mpdi_obj <- function(alpha, x, method = c("tdist","conformal"),
   
   if(method == "conformal"){
     pdi <- pred_int_conformal(x, level = level, method = m.method)
-    ans <- abs(x.max - pdi[3]) + abs(x.min - pdi[2]) - alpha 
+    ans <- abs(x.max - pdi[3]) + abs(x.min - pdi[2]) - alpha * alpha.penalty 
   }
   ## name the result
   names(ans) <- "obj_fun"

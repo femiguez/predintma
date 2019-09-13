@@ -28,7 +28,7 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   if(length(as.formula(formula)) != 3) stop("formula should be 'response' ~ 'trial'") 
   
   var.names <- all.vars(as.formula(formula))
-  x <- subset(x, select = var.names)
+  x <- subset(data, select = var.names)
   resp.name <- var.names[1]
   trial.name <- var.names[2]
 

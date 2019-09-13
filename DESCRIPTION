@@ -1,5 +1,5 @@
 Package: predintma
-Version: 0.34
+Version: 0.41
 Authors@R: person("Fernando", "Miguez", email = "femiguezt@iastate.edu", role = c("aut", "cre"))
 Title: Prediction Intervals for Meta-Analysis
 Description: This package will support an upcoming publication by Laurent et al. (2019) and more.

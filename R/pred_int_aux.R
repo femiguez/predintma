@@ -59,3 +59,4 @@ npv <- function(x, degfr = c("default","zdist","kr"), level = 0.95){
   
   npv
 }
+

@@ -60,18 +60,22 @@ If we want a prediction interval for a new observation ($Y_{n+1}$) after a sampl
 $Y_1,Y_2,Y_3,...,Y_n$ we can use the following functions.
 
 ```{r predint-numeric-class}
+set.seed(101)
 y <- rnorm(50)
 ## Using the t-distribution
 pdi.t <- pred_int_tdist(y)
-pdi.t
 ## or pdi.t <- pred_int(y)
 ## Using conformal inference
 pdi.c <- pred_int_conformal(y)
-pdi.c
 ## or pdi.c <- pred_int(y, method = "conformal")
 ## Compare this with quantiles
 y.quant <- quantile(y, probs = c(0.5, 0.025, 0.975))
-y.quant
+```
+
+```{r pred-int-numeric-class-table}
+kable(data.frame(method = c("tdist","conformal","quantile"),
+                 rbind(pdi.t, pdi.c, y.quant)), digits = c(0,2,2,2),
+      row.names = FALSE)
 ```
 
 ## Defining a Random-Effects Meta-analysis model
@@ -101,7 +105,7 @@ Now we can calculate prediction intervals
 
 ```{r soyrs-pdi}
 pdi.mf <- pred_int(soyrs, method = "metafor", var.names = c("TRT1_Yld","TRT2_Yld","Trial_ID"))
-pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soyrs, method = "ntrial")
+pdi.mcg <- pred_int_mcg_ntrial(lrr ~ Trial_ID, data = soyrs)
 pdi.t.df <- pred_int_tdist_df(soyrs, var.names = c("lrr", "Trial_ID"))
 ```
 
@@ -208,7 +212,8 @@ data(soysff)
 ## Comparing methods
 pdi.mf <- pred_int(soysff, method = "metafor", level = 0.90,
                    var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
-pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soysff, method = "ntrial", level = 0.90)
+pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soysff, 
+                    method = "ntrial", level = 0.90)
 pdi.t.df <- pred_int_tdist_df(soysff, level = 0.90,
                               var.names = c("lrr", "Trial_ID"))
 soy.lmm <- lmer(lrr ~ 1 + (1|Trial_ID), data = soysff)
@@ -240,6 +245,7 @@ Basically anything that starts with [pred]
 
 * predictionInterval
 * prediction
+* forecast
 * conformalInferernce (https://github.com/ryantibs/conformal)
 
 # TODO

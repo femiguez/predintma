@@ -4,6 +4,7 @@
 #' @param x should be an object of class "data.frame"
 #' @param method "subsampling"
 #' @param level coverage level with default 0.95
+#' @param m.method conformal method used either: 'quantile','deviation' or 'jackknife'
 #' @param neval.1 number of evaluations at the 'trial' level.
 #' @param neval.2 number of evaluations at the 'rep' level.
 #' @param s.size within-group sample size, when the number of groups is less than 20, it should be higher than 1. 
@@ -25,6 +26,7 @@
 #'
 
 pred_int_conformal_df <- function(x, method = "subsampling", level = 0.95, 
+                                  m.method = c("quantile","deviation","jackknife"),
                                   neval.1 = 500, neval.2 = 500, 
                                   s.size = 1, replace = FALSE,
                                   point.pred = c("mean","median"),
@@ -52,8 +54,11 @@ pred_int_conformal_df <- function(x, method = "subsampling", level = 0.95,
       sub.sample[k,] <- sample(xs, size = s.size, replace = replace)
       k <- k + 1
     }
-    pdi.c[i,] <- pred_int_conformal(as.vector(sub.sample), point.pred = point.pred,
-                                    level = level, neval = neval.2)
+    pdi.c[i,] <- pred_int_conformal(as.vector(sub.sample), 
+                                    neval = neval.2,
+                                    level = level,
+                                    point.pred = point.pred,
+                                    method = m.method)
   }
   ## How should I summarize these sets?
   ## Is this the intersection?

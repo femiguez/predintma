@@ -4,12 +4,12 @@
 \alias{pred_int_mcg_ntrial}
 \title{Prediction interval for a data.frame using package 'MCMCglmm' and method 'ntrial'}
 \usage{
-pred_int_mcg_ntrial(x, var.names = c("y", "trial"), level = 0.95)
+pred_int_mcg_ntrial(formula, data, level = 0.95)
 }
 \arguments{
-\item{x}{should be an object of class "data.frame"}
+\item{formula}{an object of class formula with response ~ group}
 
-\item{var.names}{variable names for 'response' and 'id': c("y","trial")}
+\item{data}{a data frame which contains the response and the grouping}
 
 \item{level}{coverage level with default 0.95}
 }
@@ -30,7 +30,7 @@ using the quantiles from the posterior distribution.
 \dontrun{
 ## Using soybean row spacing
 data(soyrs)
-pdi <- pred_int_mcg_ntrial(soyrs, var.names = c("lrr","Trial_ID"))
+pdi <- pred_int_mcg_ntrial(lrr ~ Trial_ID, data = soyrs)
 pdi 
 }
 

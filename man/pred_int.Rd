@@ -8,7 +8,7 @@ pred_int(x, interval = c("prediction", "confidence"),
   method = c("tdist", "tdist2", "boot", "mcmc", "simulate", "predict",
   "metafor", "ntrial", "conformal"), m.method = "REML",
   degfr = c("default", "zdist", "kr"), level = 0.95, nsim = 500,
-  var.names = NULL, ...)
+  var.names = NULL, formula = NULL, ...)
 }
 \arguments{
 \item{x}{should be an object of class: "numeric", "data.frame", "lmerMod" or "MCMCglmm"}
@@ -28,6 +28,8 @@ see package 'emmeans'}
 \item{nsim}{number of simulations for the 'boot' method.}
 
 \item{var.names}{variable names to be passed to the 'data.frame' methods}
+
+\item{formula}{formula interface for 'data.frame' methods}
 
 \item{...}{arguments to be passed to a few of the functions}
 }

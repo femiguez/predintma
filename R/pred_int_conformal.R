@@ -15,9 +15,12 @@
 #' @examples 
 #' \dontrun{
 #' ## Prediciton interval for simulated data
+#' set.seed(123)
 #' x <- rnorm(100)
 #' pdi.t <- pred_int_tdist(x) 
-#' pdi.c <- pred_int_conformal(x)
+#' pdi.q <- pred_int_conformal(x)
+#' pdi.d <- pred_int_conformal(x, method = "deviation")
+#' pdi.j <- pred_int_conformal(x, method = "jackknife")
 #' ## Not really a prediction interval, but related
 #' pdi.q <- quantile(x, probs = c(0.5, 0.025, 0.975))
 #' 
@@ -54,7 +57,8 @@
 #'
 pred_int_conformal <- function(x, neval = 200, level = 0.95,
                                point.pred = c("mean","median"),
-                               method = c("quantile","deviation")){
+                               method = c("quantile","deviation",
+                                          "jackknife")){
   
   if(class(x) != "numeric" & class(x) != "integer") stop("class should be numeric or integer")
   point.pred <- match.arg(point.pred)
@@ -109,7 +113,7 @@ pred_int_conformal <- function(x, neval = 200, level = 0.95,
       pvalues[i] <-  sum(ar.x >= ar.xx.i) / (length.x + 1)
     }
     ## Rule for determining lower bound
-    if(pvalues[1] > alpha/2){
+    if(pvalues[1] >= alpha/2){
       lower.bound <- xx[1]
     }else{
       ## First half of evaluations
@@ -118,13 +122,28 @@ pred_int_conformal <- function(x, neval = 200, level = 0.95,
       lower.bound <- max(xx2[pvalues2 < alpha/2])
     }
     ## Rule for determining upper bound
-    if(pvalues[neval] > alpha/2){
+    if(pvalues[neval] >= alpha/2){
       upper.bound <- xx[neval]
     }else{
       xx3 <- xx[floor(neval/2):neval]
       pvalues3 <- pvalues[floor(neval/2):neval]
       upper.bound <- min(xx3[pvalues3 < alpha/2])
     }
+  }
+  
+  if(method == "jackknife"){
+    rs.x <- numeric(length(x))
+    for(i in 1:length(x)){
+      x.m1 <- x[-i]
+      m.x.m1 <- mean(x.m1)
+      rs.x[i] <- abs(x[i] - m.x.m1)
+    }
+    k <- ceiling(length(x)*level)
+    dd <- sort(rs.x)[k]
+    ## print(rs.x)
+    ## print(dd)
+    lower.bound <- mean(x) - dd
+    upper.bound <- mean(x) + dd
   }
   
   if(point.pred == "median"){

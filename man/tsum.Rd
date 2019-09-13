@@ -5,7 +5,8 @@
 \title{Summarize a data.frame according to a given 'trial'}
 \usage{
 tsum(x, var.names = c("y", "trial"), method = c("ici", "lm",
-  "min-max"), level = 0.95, order = TRUE, add.id = TRUE)
+  "min-max"), level = 0.95, order = TRUE, add.id = TRUE,
+  formula = NULL)
 }
 \arguments{
 \item{x}{should be an object of class "data.frame"}
@@ -20,6 +21,8 @@ tsum(x, var.names = c("y", "trial"), method = c("ici", "lm",
 \item{order}{whether to order the summary by mean of response}
 
 \item{add.id}{whether to add the 'id' label}
+
+\item{formula}{alternative formula interface, if this is used 'var.names' is ignored.}
 }
 \value{
 a data.frame with the indicated summaries
