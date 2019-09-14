@@ -239,6 +239,11 @@ ggplot(data = cpdi, aes(x = fit, y = method)) +
   geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.5)
 ```
 
+# Other functions and utilities
+
+* boot_tmeans
+* pred_profile (with plot method)
+
 # Related R packages
 
 Basically anything that starts with [pred]

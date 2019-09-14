@@ -9,7 +9,7 @@
 #' @param neval number of evaluations in the conformal algorithm (see pred_int_conformal)
 #' @param tol tolerance default is (0.001) see details
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
-#' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
+#' @param m.method method used to compute conformal prediction interval: either "quantile", "deviation" or "jackknife"
 #' @return a single value which represents a 'suggestion' for the maximum level of probability given the data
 #' @details The idea is to find the maximum level of probability that will produce a conformal prediction interval
 #'          which matches the minimum and maximum values in the observed sample. This is approximate and it depends on 
@@ -29,7 +29,7 @@
 
 max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001, 
                               method = c("tdist","conformal"),
-                              m.method = c("quantile", "deviation")){
+                              m.method = c("quantile", "deviation","jackknife")){
   
   ## Not suitable for a very small sample size
   if(length(x) < 5) stop("sample size should be at least 5")
@@ -67,7 +67,7 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001,
 #' @description Finds the maximum probability for a prediction interval using optimization 
 #' @param x should be a vector
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
-#' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
+#' @param m.method method used to compute conformal prediction interval: either "quantile", "deviation" or "jackknife"
 #' @param interval maximum and minimum values for the optimization search
 #' @param alpha.penalty whether to include a penalty for alpha
 #' @param scale whether to scale the input vector
@@ -91,7 +91,7 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001,
 #'
 #'
 opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
-                                  m.method = c("quantile","deviation"),
+                                  m.method = c("quantile","deviation","jackknife"),
                                   interval = c(0,1), alpha.penalty = 0,
                                   scale = FALSE){
   
@@ -133,7 +133,7 @@ opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
 #' @param alpha miscoverage or 'error rate'
 #' @param x a vector
 #' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
-#' @param m.method method used to compute conformal prediction interval: either "quantile" or "deviation"
+#' @param m.method method used to compute conformal prediction interval: either "quantile", "deviation" or "jackknife"
 #' @param alpha.penalty whether to include an alpha penalty (default 0 or 'no')
 #' @param scale whether to scale the input vector. This only makes sense if the alpha.penalty is different from zero. 
 #' @return a single value which represents a value that should be minimized
@@ -162,7 +162,7 @@ opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
 #' }
 
 mpdi_obj <- function(alpha, x, method = c("tdist","conformal"),
-                     m.method = c("quantile","deviation"),
+                     m.method = c("quantile","deviation","jackknife"),
                      alpha.penalty=0, scale = FALSE){
   
   method <- match.arg(method)

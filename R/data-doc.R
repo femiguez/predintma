@@ -51,5 +51,5 @@
 "mzfg"
 
  #' Import packages needed for predintma to work correctly
- #' @import coda emmeans knitr lme4 metafor MCMCglmm stats
+ #' @import boot coda emmeans knitr lme4 metafor MCMCglmm stats
  NULL
