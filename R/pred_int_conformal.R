@@ -64,6 +64,10 @@ pred_int_conformal <- function(x, neval = 200, level = 0.95,
   point.pred <- match.arg(point.pred)
   method <- match.arg(method)
   
+  ## Default values in case the methods below fail
+  lower.bound <- min(x)
+  upper.bound <- max(x)
+  
   ## This is our linear evaluation
   xx <- seq(from = min(x), to = max(x), length.out = neval)
   
