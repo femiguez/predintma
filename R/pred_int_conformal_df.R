@@ -13,7 +13,7 @@
 #' @param var.names variable names to be passed to the 'data.frame' methods
 #' @param formula alternative formula interface, if this is used, 'var.names' is ignored
 #' @return a prediction interval for a "new_trial"
-#' @details TODO
+#' @details The idea for this method comes from the paper "Distribution-free Prediction Sets with Random Effects" by Dunn and Wasserman https://arxiv.org/abs/1809.07441
 #' @export
 #' @examples 
 #' \dontrun{

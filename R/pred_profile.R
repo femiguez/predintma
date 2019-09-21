@@ -29,7 +29,8 @@
 
 pred_profile <- function(x, probs = seq(0.01, 0.99, by = 0.01),
                          method = c("tdist","conformal","quantile"),
-                         m.method = c("quantile","deviation","jackknife")){
+                         m.method = c("quantile","deviation","jackknife"),
+                         neval = 200, point.pred = c("mean","median")){
   
   method <- match.arg(method)
   m.method <- match.arg(m.method)
@@ -45,7 +46,8 @@ pred_profile <- function(x, probs = seq(0.01, 0.99, by = 0.01),
     }
     
     if(method == "conformal"){
-        ans[i,c("m","lb","ub")] <- pred_int_conformal(x, method = m.method, level = probs[i])
+        ans[i,c("m","lb","ub")] <- pred_int_conformal(x, neval = neval, level = probs[i],
+                                                      point.pred = point.pred, method = m.method)
     }
     
     if(method == "quantile"){
@@ -65,19 +67,22 @@ pred_profile <- function(x, probs = seq(0.01, 0.99, by = 0.01),
 #' @title plot.pred_profile
 #' @param max.prob logical whether to plot the optmiized maximum probability
 #' @param main optional title for the plot
+#' @param max.prob.col color for the plotting of the maximum probability
 #' @return profile plots
 #' @export
 #' 
-plot.pred_profile <- function(x, max.prob = TRUE, main = NULL){
+plot.pred_profile <- function(x, max.prob = TRUE, main = NULL, max.prob.col = "blue"){
   
   if(missing(main)){
     if(x$method != "conformal") ptitle <- x$method
     if(x$method == "conformal") ptitle <- paste(x$method, x$m.method)
   }
+
+  if(max.prob == TRUE & x$method == "quantile"){
+    mpp <- opt_max_prob_pred_int(x$data, method = "npar")
+  } 
   
-  if(x$method == "quantile") max.prob <- FALSE; mpp <- NA
-  
-  if(max.prob == TRUE){
+  if(max.prob == TRUE & x$method != "quantile"){
     mpp <- opt_max_prob_pred_int(x$data, method = x$method, m.method = x$m.method)
   }
   
@@ -89,7 +94,7 @@ plot.pred_profile <- function(x, max.prob = TRUE, main = NULL){
        xlab = "y", ylab = "probabilities")
   lines(x = tmp$lb, y = tmp$probs)
   lines(x = tmp$ub, y = tmp$probs)
-  abline(h = mpp, col = "blue")
+  abline(h = mpp, col = max.prob.col)
   
 }
 

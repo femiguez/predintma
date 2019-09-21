@@ -66,7 +66,7 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001,
 #' @name opt_max_prob_pred_int
 #' @description Finds the maximum probability for a prediction interval using optimization 
 #' @param x should be a vector
-#' @param method either 'tdist' (assumes normality) or 'conformal' (distribution-free)
+#' @param method either 'tdist' (assumes normality), 'conformal' (distribution-free), or non-parametric
 #' @param m.method method used to compute conformal prediction interval: either "quantile", "deviation" or "jackknife"
 #' @param interval maximum and minimum values for the optimization search
 #' @param alpha.penalty whether to include a penalty for alpha
@@ -90,7 +90,7 @@ max_prob_pred_int <- function(x, n = 200, neval = 200, tol = 0.001,
 #' }
 #'
 #'
-opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
+opt_max_prob_pred_int <- function(x, method = c("tdist","conformal","npar"),
                                   m.method = c("quantile","deviation","jackknife"),
                                   interval = c(0,1), alpha.penalty = 0,
                                   scale = FALSE){
@@ -101,7 +101,9 @@ opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
   if(method == "tdist"){
     ans <- optimize(f = mpdi_obj, interval = interval, 
                     x = x, method = method, m.method = m.method)$minimum
-  }else{
+  }
+  
+  if(method == "conformal"){
     ## It turns out that for the conformal method this optimization
     ## problem is harder, but not that hard
     ## First line-search the optimization function
@@ -120,6 +122,10 @@ opt_max_prob_pred_int <- function(x, method = c("tdist","conformal"),
                     x = x, method = method, m.method = m.method,
                     alpha.penalty = alpha.penalty,
                     scale = scale)$minimum
+  }
+  
+  if(method == "npar"){
+    ans <- 1 - (length(x) - 1)/(length(x) + 1)
   }
   
   return(1 - ans)
