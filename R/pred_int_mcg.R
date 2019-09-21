@@ -31,6 +31,10 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   x <- subset(data, select = var.names)
   resp.name <- var.names[1]
   trial.name <- var.names[2]
+  
+  ## Set up alpha
+  alpha <- 1 - level
+  half.alpha <- alpha/2
 
   ## Create "new trial"
   ndat <- data.frame(x[1,])
@@ -51,7 +55,8 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
                    nitt = 5e4, burnin = 5e3,
                    data = dat, verbose = FALSE)
   
-  mcg2 <- MCMCglmm(lrr ~ 1, random = trial.fm, 
+  mcg2 <- MCMCglmm(fixed = resp.fm, 
+                   random = trial.fm, 
                    prior = prior1, pr = TRUE, 
                    nitt = 5e4, burnin = 5e3,
                    data = dat, verbose = FALSE)
@@ -67,7 +72,7 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   
   pd.mu <- as.data.frame(mcg2$Sol[,1])
   prdi.mu <- pd.mu + new.t.beff
-  pdi <- quantile(prdi.mu[,1], probs = c(0.5, 0.025, 0.975))
+  pdi <- quantile(prdi.mu[,1], probs = c(0.5, half.alpha, 1 - half.alpha))
   
   ans <- pdi
   

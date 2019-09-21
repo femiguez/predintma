@@ -1,17 +1,19 @@
 #' Bootstrapped distribution of trial means
 #' 
-#' @title Trial means bootstrap
+#' @title Bootstrap distribution of trial means
+#' @name boot_tmeans
 #' @param formula standard R formula of the form response ~ trial
 #' @param data data frame
-#' @param nsim number of bootstrap samples
+#' @param R number of bootstrap samples
 #' @param var.names alternative to formula
 #' @param ci.type type of confidence interval (see boot::boot.ci)
+#' @param level prediction level
 #' @return list with 'dat': data frame with the bootstrapped means, \cr 
 #'          'boot.ci': confidence interval computed by 'boot.ci' \cr
-#'          and 'quantile.pdi': prediction interval based on quantiles 
+#'          and 'pdi': prediction interval based on quantiles 
 #' @export
 #' @examples 
-#' \donotrun{
+#' \dontrun{
 #' require(ggplot2)
 #' data(soyrs)
 #' ## Simply calculate the trial means
@@ -22,7 +24,7 @@
 #' pdi.cf <- pred_int_conformal_df(formula = lrr ~ Trial_ID, x = soyrs)
 #' 
 #' btmd <- btm$dat
-#' btm.q <- btm$quantile.pdi
+#' btm.q <- btm$pdi
 #' 
 #' ggplot() + xlab("lrr") + 
 #' geom_density(data = btmd, aes(x = ys)) + 
@@ -66,12 +68,31 @@ boot_tmeans <- function(formula=NULL, data, R = 500,
   btm <- boot(dat, statistic = tmfb, strata = dat$trial, R = R)
   btm.ci <- boot.ci(btm, conf = level, type = ci.type)
   
-  q.pdi <- quantile(c(btm$t), probs = c(0.5, half.alpha, 1 - half.alpha))
+  pdi <- quantile(c(btm$t), probs = c(0.5, half.alpha, 1 - half.alpha))
   
   ans <- list(dat = data.frame(ys = c(btm$t)), 
               boot.ci = btm.ci,
-              quantile.pdi = q.pdi)
+              pdi = pdi)
   ans
+}
+
+
+#' Bootstrap-based prediction intervals 
+#' 
+#' @title Bootstrap-based prediction intervals
+#' @name pred_int_boot
+#' @param formula standard R formula of the form response ~ trial
+#' @param data data frame
+#' @param level prediction level
+#' @param R number of bootstrap samples
+#' @return prediction interval
+#' @details a simple wrapper for boot_tmeans
+#' @export
+#' 
+
+pred_int_boot <- function(formula, data, level, R = 500){
+  pdi <- boot_tmeans(formula = formula, data = data, R = R, level = level)$pdi
+  pdi
 }
 
 
