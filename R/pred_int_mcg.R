@@ -49,17 +49,21 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   trial.fm <- as.formula(paste0("~",trial.name))
   resp.fm <- as.formula(paste0(resp.name,"~1"))
   ## Run the chains
-  mcg1 <- MCMCglmm(fixed = resp.fm,
+  mc1 <- mcparallel(MCMCglmm(fixed = resp.fm,
                    random = trial.fm, 
                    prior = prior1, pr = TRUE, 
                    nitt = 5e4, burnin = 5e3,
-                   data = dat, verbose = FALSE)
+                   data = dat, verbose = FALSE))
   
-  mcg2 <- MCMCglmm(fixed = resp.fm, 
+  mc2 <- mcparallel(MCMCglmm(fixed = resp.fm, 
                    random = trial.fm, 
                    prior = prior1, pr = TRUE, 
                    nitt = 5e4, burnin = 5e3,
-                   data = dat, verbose = FALSE)
+                   data = dat, verbose = FALSE))
+  
+  mcg1 <- mccollect(mc1)[[1]]
+  mcg2 <- mccollect(mc2)[[1]]
+  
   gd1 <- gelman.diag(mcmc.list(mcg1$Sol, mcg2$Sol))
   gd2 <- gelman.diag(mcmc.list(mcg1$VCV, mcg2$VCV))
   

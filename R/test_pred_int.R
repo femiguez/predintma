@@ -6,6 +6,7 @@
 #' @param method either 'tdist', 'ntrial', 'jags' or 'boot'
 #' @param level prediction level
 #' @param iter number of iterations
+#' @param quiet logical. TRUE by default
 #' @param ... additional arguments to be passed to the functions
 #' @export
 #' @examples 
@@ -62,15 +63,15 @@ test_pred_int <- function(formula, data,
       }
       ## Does it include the one that we left out?
       inc[j] <- includes(loo, pdi[2], pdi[3])
+      if(!quiet){
+        if(j %% (n.trials%/%10) == 0){
+          prog.time <- Sys.time() - start
+          cat("progress ",j/n.trials*100,"% time: ",prog.time,"\n")
+        }
+      }
     }
     pdis[i,1:3] <- as.vector(pdi)
     coverage[i] <- mean(inc)
-    if(!quiet){
-      if(i %% (n.trials%/%10) == 0){
-        prog.time <- Sys.time() - start
-        cat("progress ",i/n.trials*100,"% time: ",prog.time,"\n")
-      }
-    }
   }
   ans <- list(pdi=pdis, coverage = coverage)
   ans

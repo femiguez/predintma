@@ -8,6 +8,7 @@
 #' @param var.names alternative to formula
 #' @param ci.type type of confidence interval (see boot::boot.ci)
 #' @param level prediction level
+#' @param ncpus number of cpus to use, passed to boot, negligible benefit for small datasets
 #' @return list with 'dat': data frame with the bootstrapped means, \cr 
 #'          'boot.ci': confidence interval computed by 'boot.ci' \cr
 #'          and 'pdi': prediction interval based on quantiles 
@@ -42,7 +43,8 @@
 boot_tmeans <- function(formula=NULL, data, R = 500, 
                         var.names = c("y","trial"),
                         ci.type = "basic", 
-                        level = 0.95){
+                        level = 0.95,
+                        ncpus = 1){
   
   ## Sample with replacement hierarchically
   ## First sample a given trial
@@ -51,6 +53,12 @@ boot_tmeans <- function(formula=NULL, data, R = 500,
   
   alpha <- 1 - level
   half.alpha <- alpha/2
+  
+  if(ncpus > 1){
+    prll <- "multicore"
+  }else{
+    prll <- "no"
+  }
   
   ## First: extract variables
   if(!missing(formula)) var.names <- all.vars(as.formula(formula))
@@ -65,7 +73,8 @@ boot_tmeans <- function(formula=NULL, data, R = 500,
     ans
   }
 
-  btm <- boot(dat, statistic = tmfb, strata = dat$trial, R = R)
+  btm <- boot(dat, statistic = tmfb, strata = dat$trial, R = R,
+              parallel = prll, ncpus = ncpus)
   btm.ci <- boot.ci(btm, conf = level, type = ci.type)
   
   pdi <- quantile(c(btm$t), probs = c(0.5, half.alpha, 1 - half.alpha))
@@ -85,13 +94,15 @@ boot_tmeans <- function(formula=NULL, data, R = 500,
 #' @param data data frame
 #' @param level prediction level
 #' @param R number of bootstrap samples
+#' @param ncpus number of cpus to use, passed to boot, negligible benefit for small datasets
 #' @return prediction interval
 #' @details a simple wrapper for boot_tmeans
 #' @export
 #' 
 
-pred_int_boot <- function(formula, data, level, R = 500){
-  pdi <- boot_tmeans(formula = formula, data = data, R = R, level = level)$pdi
+pred_int_boot <- function(formula, data, level = 0.95, R = 500, ncpus=1){
+  pdi <- boot_tmeans(formula = formula, data = data, R = R, 
+                     level = level, ncpus = ncpus)$pdi
   pdi
 }
 
