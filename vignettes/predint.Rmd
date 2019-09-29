@@ -20,21 +20,23 @@ library(ggplot2)
 
 # Prediction
 
-The topic of prediction has gained considerable attention in the field of statistics and meta-analysis is no exception. Perhaps the most important practical benefit of a prediciton interval in meta-analysis is that it encapsulates information about the between-trial variability and it complements information about the point estimate. In contrast, the magnitude of the between-trial variance is difficult to interpret in isolation and the inability to capture the between-trial variance has been a topic of intense debate. When the estimate is zero (or close) the argument is that a "fixed" model is more appropriate, but the interpretation and usefulness of a prediction interval in this case is questionable. The "random-effects" model is assumed to always be the "correct" model, but not every dataset supports this type of model. Providing prediciton intervals in meta-analysis relfects a more accurate representation about whether the drug, treatment or intervention will be effective in future environments or for other experimental units not in our sample.
+The topic of prediction has gained considerable attention in the field of statistics and meta-analysis is no exception. Perhaps the most important practical benefit of a prediciton interval in meta-analysis is that it encapsulates information about the between-trial variability and it complements information about the point estimate. In contrast, the magnitude of the between-trial variance is difficult to interpret in isolation and the inability to capture the between-trial variance has been a topic of intense debate. When the estimate is zero (or close) the argument is that a "fixed" model is more appropriate, but the interpretation and usefulness of a prediction interval in this case is questionable. The "random-effects" model is assumed to always be the "correct" model, but not every dataset supports this type of model. Providing prediciton intervals in meta-analysis relfects a more accurate representation about whether the drug, treatment or intervention will be effective in future environments or for other trials or studies not in our sample.
 
 ## What is a prediction interval?
 
 Let's define it:
 
-An interval that will contain a future observation (i.e. not part of our sample) with a given level of miscoverage (say 5 or 10%), given our observed data.
+An interval that will contain a future observation (i.e. not part of our sample) with a given level of miscoverage (say 5 or 10%), given our observed data. For this application, our inference is about a new study or trial, not about an individual observation or subject within a trial or study.
 
-Very wide intervals have a high probability of containing the future observation but are likely to be impractically wide for decision making. Intervals that are too narrow and do not have nominal coverage give us an illusion of precision and certainty which might not hold true in the long run.
+Very wide intervals have a high probability of containing the future trial/study but are likely to be impractically wide for decision making. Intervals that are too narrow and do not have nominal coverage give us an illusion of precision and certainty which might not hold true in the long run.
 
 A prediction interval (https://en.wikipedia.org/wiki/Prediction_interval) is not a new idea and it goes back to the tradition of Gosset, Fisher and Neyman (Shafer and Vovk, 2008). 
 
 ### Mathematical definition
 
 Given a sample ($X_1, X_2, X_3, ..., X_n$) we want an interval that will contain $X_{n+1}$ with probability ($1 - \alpha$, where $\alpha \in (0,1)$). The level of miscoverage ($\alpha$) is typically 0.05 or 0.10. It is common to suppose that $X$ needs to meet the assumption of identically and indepenednently distributed (iid) and Gaussian, but this can be relaxed. 
+
+This package provides different methods for calculating a prediction interval for a random-effects model. This type of model is typical in meta-analysis.
 
 # Classes supported
 
@@ -43,7 +45,7 @@ There is substantial material on this topic here: https://femiguez.github.io/paf
 Classes supported:
 
 * 'numeric': **pred_int_tdist** and **pred_int_conformal**
-* 'data.frame': **pred_int_metafor** and **pred_int_mcg_ntrial**
+* 'data.frame': **pred_int_metafor**,  **pred_int_mcg_ntrial** and **pred_int_boot**
 * 'MCMCglmm': **pred_int_mcg_tdist** (method 'tdist'), 
               **pred_int** (method = 'mcmc'),
               **pred_int** (method = 'simulate'),
@@ -52,7 +54,7 @@ Classes supported:
              **pred_int** (method = 'boot'),
              **pred_int** (method = 'tdist2')
              
-All of these methods can be accessed through the interface 'pred_int'
+All of these methods can be accessed through the interface 'pred_int' (not finished yet).
 
 ## A variable from a single distribution
 
@@ -106,10 +108,11 @@ Now we can calculate prediction intervals
 ```{r soyrs-pdi}
 pdi.mf <- pred_int(soyrs, method = "metafor", var.names = c("TRT1_Yld","TRT2_Yld","Trial_ID"))
 pdi.mcg <- pred_int_mcg_ntrial(lrr ~ Trial_ID, data = soyrs)
+pdi.boot <- pred_int_boot(lrr ~ Trial_ID, data = soyrs)
 pdi.t.df <- pred_int_tdist_df(soyrs, var.names = c("lrr", "Trial_ID"))
 ```
 
-Alternatively, we can fit a model first using 'lme4' and then calcualte prediction intervals.
+Alternatively, we can fit a model first using 'lme4' and then calcualte prediction intervals using different methods.
 
 ```{r soyrs-lmer}
 soy.lmm <- lmer(lrr ~ 1 + (1|Trial_ID), data = soyrs)
@@ -134,16 +137,17 @@ pdi.cf.df <- pred_int_conformal_df(soyrs, var.names = c("lrr","Trial_ID"), s.siz
 Let's display the data for the different methods.
 
 ```{r comb-pi-soyrs, echo = FALSE}
-methods <- c("metafor", "mcg-ntrial","lmer-tdist","lmer-boot","lmer-tdist2",
+methods <- c("metafor", "mcg-ntrial","boot","lmer-tdist","lmer-boot","lmer-tdist2",
              "lmer-tdist-kr","lmer-tdist-inf","conformal","tdist-df")
 cpdi <- data.frame(method = methods, 
-                   rbind(pdi.mf,pdi.mcg,pdi.lm1,pdi.lm2,pdi.lm3,
+                   rbind(pdi.mf,pdi.mcg,pdi.boot,pdi.lm1,pdi.lm2,pdi.lm3,
                          pdi.lm4,pdi.lm5,pdi.cf.df,pdi.t.df))
 kable(cpdi)
 ggplot(data = cpdi, aes(x = fit, y = method)) +
   geom_point() + 
   geom_errorbarh(aes(xmin = lwr, xmax = upr), height = 0.5)
 ```
+
 ## Looking at a 'large' dataset
 
 This is an example where a foliar fungicide was applied.
@@ -197,8 +201,7 @@ ggplot(data = cpdi, aes(x = fit, y = method)) +
 
 ## Comparing methods for a dataset which has a between-trial variance equal to zero
 
-For this example I will use 90% prediction intervals as they are more stable than the 
-typical 95%.
+For this example I will use 90% prediction intervals as they are more stable than the typical 95%.
 
 There are many models here that solve the problem in different ways. The conformal prediction interval has some advantages and disadvantages:
 
@@ -298,7 +301,7 @@ Basically anything that starts with [pred]
 
 # TODO
 
-* Implement new ideas, nothing seems to be working...
+* Working on simulations at the moment...
 
 # References
 
