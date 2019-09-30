@@ -6,6 +6,10 @@
 #' @param formula an object of class formula with response ~ group
 #' @param data a data frame which contains the response and the grouping 
 #' @param level coverage level with default 0.95
+#' @param control list which provides crontrol over the MCMC method \cr
+#'                burnin = 5000 (default) \cr
+#'                nitt = 50000 (default) \cr
+#'                prior = list (see MCMCglmm) \cr
 #' @return a prediction interval for a "new_trial"
 #' @details see function 'MCMCglmm' in package 'MCMCglmm'. The method adds an extra row to 
 #' the data.frame with missing response and then calculates the 'prediciton' for that new row
@@ -21,7 +25,8 @@
 #'
 #'
 
-pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
+pred_int_mcg_ntrial <- function(formula, data, level = 0.95, 
+                                control = list()){
   
   if(missing(data)) stop("data are missing")
   if(class(data) != "data.frame") stop("only for data frames")
@@ -43,22 +48,25 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95){
   ## Created the data.frame with the "empty" trial
   dat <- rbind(x, ndat)
   
-  prior1 <- list(B = list(mu = 0, V = 10),
-                 G = list(G1 = list(V = 1, nu = 0.002)),
-                 R = list(V = 1, nu = 0.002))
+  mcmc.c <- mcmc.control()
+  mcmc.c[names(control)] <- control
+  prior1 <- mcmc.c$prior
+  brn <- mcmc.c$burnin
+  nitt <- mcmc.c$nitt
+  
   trial.fm <- as.formula(paste0("~",trial.name))
   resp.fm <- as.formula(paste0(resp.name,"~1"))
   ## Run the chains
   mc1 <- mcparallel(MCMCglmm(fixed = resp.fm,
                    random = trial.fm, 
                    prior = prior1, pr = TRUE, 
-                   nitt = 5e4, burnin = 5e3,
+                   nitt = nitt, burnin = brn,
                    data = dat, verbose = FALSE))
   
   mc2 <- mcparallel(MCMCglmm(fixed = resp.fm, 
                    random = trial.fm, 
                    prior = prior1, pr = TRUE, 
-                   nitt = 5e4, burnin = 5e3,
+                   nitt = nitt, burnin = brn,
                    data = dat, verbose = FALSE))
   
   mcg1 <- mccollect(mc1)[[1]]
@@ -117,4 +125,21 @@ pred_int_mcg_tdist <- function(x, level = 0.95){
   mu.uci <- mu + pdi
   ans <- as.vector(c(mu, mu.lci, mu.uci))
   return(ans)
+}
+
+#' @name mcmc.control
+#' @param burnin warmup or burnin iterations
+#' @param nitt number of iterations for the MCMC method
+#' @param prior prior specification as in the MCMCglmm package
+#' @export
+#' 
+mcmc.control <- function(burnin = 5e3, nitt = 5e4, prior = NULL){
+  
+  if(missing(prior)){
+    prior1 <- list(B = list(mu = 0, V = 10),
+                   G = list(G1 = list(V = 1, nu = 0.002)),
+                   R = list(V = 1, nu = 0.002))
+  }
+  ans <- list(burnin = burnin, nitt = nitt, prior = prior)
+  ans
 }
