@@ -2,12 +2,12 @@
 #' 
 #' @title pred_profile
 #' @param probs probabilities at which to calculate a probability interval
-#' @param method either "tdist" or "conformal"
-#' @param m.method conformal method (quantile, deviation, jackknife)
-#' @return data frame with prediction intervals at specified probs
+#' @param method either "tdist", "conformal" or "quantile"
+#' @param m.method conformal method (quantile, deviation or jackknife)
+#' @return an object of class 'pred_profile'
 #' @export
 #' @examples 
-#' \donotrun{
+#' \dontrun{
 #' set.seed(12345)
 #' x <- rnorm(25)
 #' ## t-dist method
@@ -79,11 +79,11 @@ plot.pred_profile <- function(x, max.prob = TRUE, main = NULL, max.prob.col = "b
   }
 
   if(max.prob == TRUE & x$method == "quantile"){
-    mpp <- opt_max_prob_pred_int(x$data, method = "npar")
+    mpp <- max_prob_pred_int(x$data, method = "npar")
   } 
   
   if(max.prob == TRUE & x$method != "quantile"){
-    mpp <- opt_max_prob_pred_int(x$data, method = x$method, m.method = x$m.method)
+    mpp <- max_prob_pred_int(x$data, method = x$method, m.method = x$m.method)
   }
   
   tmp <- x$ans

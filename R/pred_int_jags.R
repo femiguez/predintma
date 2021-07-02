@@ -3,17 +3,22 @@
 #' @title pred_int_jags
 #' @param formula standard R formula response ~ trial
 #' @param data data frame
-#' @param df degrees of freedom for the t-distribution. If 'NA' it will be treated as a nuisance parameter
+#' @param df degrees of freedom for the t-distribution. If 'NA' it will be treated as a nuisance parameter (default)
 #' @param level probability level
 #' @param quiet whether to display progress of sampling
+#' @param ... further arguments passed to or from other methods.
 #' @param return type of information to return either 'pdi' just the prediction interval or 'all' which include the output from the model and Gelman diagnostics
 #' @return prediction interval (or more detail)
 #' @export
 #' 
 
-pred_int_jags <- function(formula, data, df=1, level = 0.95, 
-                          quiet = FALSE, return = c("pdi","all")){
+pred_int_jags <- function(formula, data, df=NA, level = 0.95, 
+                          quiet = FALSE, return = c("pdi","all"),...){
   
+  if(!requireNamespace("rjags", quietly = TRUE)){
+    warning("The rjags package is required for this function")
+    return(NULL)
+  }
   
   return <- match.arg(return)
   

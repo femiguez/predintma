@@ -4,9 +4,14 @@
 \alias{pred_int_tdist_df}
 \title{Prediction interval for a 'data.frame' based on the t-distribution}
 \usage{
-pred_int_tdist_df(x, level = 0.95, neval = 500,
-  interval = c("prediction", "confidence"), var.names = c("y",
-  "trial"), formula = NULL)
+pred_int_tdist_df(
+  x,
+  level = 0.95,
+  neval = 500,
+  interval = c("prediction", "confidence"),
+  var.names = c("y", "trial"),
+  formula = NULL
+)
 }
 \arguments{
 \item{x}{should be an object of class "data.frame"}

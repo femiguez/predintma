@@ -4,8 +4,7 @@
 \alias{pred_int_tdist}
 \title{Prediction interval for a 'numeric' based on the t-distribution}
 \usage{
-pred_int_tdist(x, level = 0.95, interval = c("prediction",
-  "confidence"))
+pred_int_tdist(x, level = 0.95, interval = c("prediction", "confidence"))
 }
 \arguments{
 \item{x}{should be an object of class "numeric"}

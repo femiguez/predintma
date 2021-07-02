@@ -4,7 +4,7 @@
 \alias{pred_int_mcg_ntrial}
 \title{Prediction interval for a data.frame using package 'MCMCglmm' and method 'ntrial'}
 \usage{
-pred_int_mcg_ntrial(formula, data, level = 0.95)
+pred_int_mcg_ntrial(formula, data, level = 0.95, control = list(), ...)
 }
 \arguments{
 \item{formula}{an object of class formula with response ~ group}
@@ -12,6 +12,11 @@ pred_int_mcg_ntrial(formula, data, level = 0.95)
 \item{data}{a data frame which contains the response and the grouping}
 
 \item{level}{coverage level with default 0.95}
+
+\item{control}{list which provides crontrol over the MCMC method \cr
+burnin = 5000 (default) \cr
+nitt = 50000 (default) \cr
+prior = list (see MCMCglmm) \cr}
 }
 \value{
 a prediction interval for a "new_trial"

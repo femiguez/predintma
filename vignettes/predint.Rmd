@@ -169,6 +169,7 @@ ggplot(data = mzfg.s, aes(x = m, y = id)) +
 ```{r mzfg-pdi}
 pdi.mf <- pred_int(mzfg, method = "metafor", var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
 pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = mzfg, method = "ntrial")
+pdi.boot <- pred_int_boot(formula = lrr ~ Trial_ID, data = mzfg)
 pdi.t.df <- pred_int_tdist_df(mzfg, var.names = c("lrr", "Trial_ID"))
 ```
 
@@ -186,12 +187,12 @@ pdi.cf.df <- pred_int_conformal_df(mzfg, var.names = c("lrr","Trial_ID"), s.size
 ```
 
 ```{r comb-pi-mzfg, echo = FALSE}
-methods <- c("metafor", "mcg-ntrial","tdist-df","lmer-tdist","lmer-boot","lmer-tdist2",
+methods <- c("metafor", "mcg-ntrial","boot","tdist-df","lmer-tdist","lmer-boot","lmer-tdist2",
              "lmer-tdist-kr","lmer-tdist-inf","conformal")
 cpdi <- data.frame(method = methods, 
-                   rbind(pdi.mf,pdi.mcg,pdi.t.df, 
-                         pdi.lm1,pdi.lm2,pdi.lm3,
-                         pdi.lm4,pdi.lm5,pdi.cf.df))
+                   rbind(pdi.mf,pdi.mcg,pdi.boot,
+                         pdi.t.df, pdi.lm1,pdi.lm2,
+                         pdi.lm3,pdi.lm4,pdi.lm5,pdi.cf.df))
 kable(cpdi)
 ggplot(data = cpdi, aes(x = fit, y = method)) +
   geom_point() + 
@@ -215,6 +216,8 @@ data(soysff)
 ## Comparing methods
 pdi.mf <- pred_int(soysff, method = "metafor", level = 0.90,
                    var.names = c("TRT_Yld","CTR_Yld","Trial_ID"))
+pdi.boot <- pred_int_boot(formula = lrr ~ Trial_ID, data = soysff, 
+                    level = 0.90)
 pdi.mcg <- pred_int(formula = lrr ~ Trial_ID, x = soysff, 
                     method = "ntrial", level = 0.90)
 pdi.t.df <- pred_int_tdist_df(soysff, level = 0.90,

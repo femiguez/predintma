@@ -4,9 +4,13 @@
 \alias{pred_int_conformal}
 \title{Prediction interval for a 'numeric' based on conformal inference}
 \usage{
-pred_int_conformal(x, neval = 200, level = 0.95,
-  point.pred = c("mean", "median"), method = c("quantile", "deviation",
-  "jackknife"))
+pred_int_conformal(
+  x,
+  neval = 200,
+  level = 0.95,
+  point.pred = c("mean", "median"),
+  method = c("quantile", "deviation", "jackknife")
+)
 }
 \arguments{
 \item{x}{should be an object of class "numeric"}

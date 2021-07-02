@@ -4,11 +4,19 @@
 \alias{pred_int_conformal_df}
 \title{Conformal Prediction Interval for Random-effects Meta-analysis}
 \usage{
-pred_int_conformal_df(x, method = "subsampling", level = 0.95,
-  m.method = c("quantile", "deviation", "jackknife"), neval.1 = 500,
-  neval.2 = 500, s.size = 1, replace = FALSE,
-  point.pred = c("mean", "median"), var.names = c("y", "trial"),
-  formula = NULL)
+pred_int_conformal_df(
+  x,
+  method = "subsampling",
+  level = 0.95,
+  m.method = c("quantile", "deviation", "jackknife"),
+  neval.1 = 500,
+  neval.2 = 500,
+  s.size = 1,
+  replace = FALSE,
+  point.pred = c("mean", "median"),
+  var.names = c("y", "trial"),
+  formula = NULL
+)
 }
 \arguments{
 \item{x}{should be an object of class "data.frame"}

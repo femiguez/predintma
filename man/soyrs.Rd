@@ -4,7 +4,8 @@
 \name{soyrs}
 \alias{soyrs}
 \title{Soybean row spacing on-farm trials}
-\format{A data frame with 119 rows and 6 variables:
+\format{
+A data frame with 119 rows and 6 variables:
 \describe{
   \item{Year}{ -integer- year that the trial was conducted.}
   \item{Trial_ID}{ -factor- given name for the specific trial.}
@@ -13,7 +14,8 @@
   \item{lrr}{ -numeric- logarithm of the 'response ratio' i.e. log(TRT1_Yld/TRT2_Yld).}
   \item{id}{ -integer- added 'id' column which orders observations by the magnitude of
              the 'lrr'}
-}}
+}
+}
 \source{
 \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
 }

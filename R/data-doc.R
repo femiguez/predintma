@@ -50,6 +50,38 @@
 #' @source \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
 "mzfg"
 
+#' Maize Foliar Fungicide (Stratego)
+#'
+#' A dataset containing the trial id, year, rep, yield of treatment, yield of control and the
+#' logarithm of the response ratio 
+#'
+#' @format A data frame with 153 rows and 4 variables:
+#' \describe{
+#'   \item{Trial_ID}{ -factor- given name for the specific trial.}
+#'   \item{TRT_Yld}{ -numeric- yield for treated (fungicide Stratego).}
+#'   \item{CTR_Yld}{ -numeric- yield for untreated (control).}
+#'   \item{lrr}{ -numeric- logarithm of the 'response ratio' i.e. log(TRT_Yld/CTR_Yld).}
+#' }
+#' @source \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
+"mzstr"
+
+#' Soybean Fungicide (Priaxor)
+#'
+#' A dataset containing the trial id, year, rep, yield of treatment, yield of control and the
+#' logarithm of the response ratio 
+#'
+#' @format A data frame with 191 rows and 6 variables:
+#' \describe{
+#'   \item{Trial_ID}{ -factor- given name for the specific trial.}
+#'   \item{Year}{ -integer- year when the trial was conducted.}
+#'   \item{Rep}{-integer- replication.}
+#'   \item{TRT_Yld}{ -numeric- yield for treated (fungicide Priaxor).}
+#'   \item{CTR_Yld}{ -numeric- yield for untreated (control).}
+#'   \item{lrr}{ -numeric- logarithm of the 'response ratio' i.e. log(TRT_Yld/CTR_Yld).}
+#' }
+#' @source \url{https://analytics.iasoybeans.com/cool-apps/ISOFAST/}
+"soyprx"
+
  #' Import packages needed for predintma to work correctly
  #' @import boot coda emmeans knitr lme4 metafor MCMCglmm parallel rjags stats
  NULL

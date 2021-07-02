@@ -4,9 +4,15 @@
 \alias{tsum}
 \title{Summarize a data.frame according to a given 'trial'}
 \usage{
-tsum(x, var.names = c("y", "trial"), method = c("ici", "lm",
-  "min-max"), level = 0.95, order = TRUE, add.id = TRUE,
-  formula = NULL)
+tsum(
+  x,
+  var.names = c("y", "trial"),
+  method = c("ici", "lm", "min-max"),
+  level = 0.95,
+  order = TRUE,
+  add.id = TRUE,
+  formula = NULL
+)
 }
 \arguments{
 \item{x}{should be an object of class "data.frame"}

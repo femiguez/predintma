@@ -26,7 +26,7 @@
 #'
 
 pred_int_mcg_ntrial <- function(formula, data, level = 0.95, 
-                                control = list()){
+                                control = list(),...){
   
   if(missing(data)) stop("data are missing")
   if(class(data) != "data.frame") stop("only for data frames")
@@ -75,8 +75,8 @@ pred_int_mcg_ntrial <- function(formula, data, level = 0.95,
   gd1 <- gelman.diag(mcmc.list(mcg1$Sol, mcg2$Sol))
   gd2 <- gelman.diag(mcmc.list(mcg1$VCV, mcg2$VCV))
   
-  if(gd1$mpsrf > 1.1) warning("chain might have not converged, gd1 (fixed)")
-  if(gd2$mpsrf > 1.1) warning("chain might have not converged, gd2 (random)")
+  if(gd1$mpsrf > 1.1) warning(paste0("chain might have not converged, gd1 (fixed). ratio: ",gd1$mpsrf))
+  if(gd2$mpsrf > 1.1) warning(paste0("chain might have not converged, gd2 (random). ratio: ",gd2$mpsrf))
   
   sdf <- as.data.frame(mcg2$Sol)
   ntn <- paste0(trial.name,".A_new_trial")
@@ -127,6 +127,7 @@ pred_int_mcg_tdist <- function(x, level = 0.95){
   return(ans)
 }
 
+#' @title Control options for MCMCglmm within pred_int_mcg
 #' @name mcmc.control
 #' @param burnin warmup or burnin iterations
 #' @param nitt number of iterations for the MCMC method
@@ -136,7 +137,7 @@ pred_int_mcg_tdist <- function(x, level = 0.95){
 mcmc.control <- function(burnin = 5e3, nitt = 5e4, prior = NULL){
   
   if(missing(prior)){
-    prior1 <- list(B = list(mu = 0, V = 10),
+    prior <- list(B = list(mu = 0, V = 10),
                    G = list(G1 = list(V = 1, nu = 0.002)),
                    R = list(V = 1, nu = 0.002))
   }

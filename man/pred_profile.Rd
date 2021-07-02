@@ -4,25 +4,30 @@
 \alias{pred_profile}
 \title{pred_profile}
 \usage{
-pred_profile(x, probs = seq(0.01, 0.99, by = 0.01), method = c("tdist",
-  "conformal", "quantile"), m.method = c("quantile", "deviation",
-  "jackknife"), neval = 200, point.pred = c("mean", "median"))
+pred_profile(
+  x,
+  probs = seq(0.01, 0.99, by = 0.01),
+  method = c("tdist", "conformal", "quantile"),
+  m.method = c("quantile", "deviation", "jackknife"),
+  neval = 200,
+  point.pred = c("mean", "median")
+)
 }
 \arguments{
 \item{probs}{probabilities at which to calculate a probability interval}
 
-\item{method}{either "tdist" or "conformal"}
+\item{method}{either "tdist", "conformal" or "quantile"}
 
-\item{m.method}{conformal method (quantile, deviation, jackknife)}
+\item{m.method}{conformal method (quantile, deviation or jackknife)}
 }
 \value{
-data frame with prediction intervals at specified probs
+an object of class 'pred_profile'
 }
 \description{
 Prediction Interval Profiles
 }
 \examples{
-\\donotrun{
+\dontrun{
 set.seed(12345)
 x <- rnorm(25)
 ## t-dist method

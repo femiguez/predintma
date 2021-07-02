@@ -4,23 +4,24 @@
 #' and the between study uncertainty, but there is more to this...
 #' Implemented cases:
 #'
-#' object = numeric \cr
-#' object = lmerMod \cr
-#' object = MCMCglmm \cr
-#' object = data.frame \cr
+#' object of class 'numeric' \cr
+#' object of class 'lmerMod' \cr
+#' object of class 'MCMCglmm' \cr
+#' object of class 'data.frame' \cr
 #'
-#' For object = numeric the method is based on the 'lm' function
+#' For object of class numeric method t-dist is based on the 'lm' function and predict
+#' There is also a method based on conformal prediction. See 'pred_int_conformal'
 #'
-#' For object = 'lmerMod' there are three methods:
-#' - tdist
-#' - tdist2
-#' - boot
+#' For object of class 'lmerMod' there are three methods: \cr
+#' - tdist \cr
+#' - tdist2 \cr
+#' - boot (uses lme4::bootMer) \cr
 #'
-#' For object = 'MCMCglmm' there are four methods:
-#' - tdist
-#' - mcmc
-#' - simulate
-#' - predict
+#' For object of class 'MCMCglmm' there are four methods: \cr
+#' - tdist \cr
+#' - mcmc \cr
+#' - simulate \cr
+#' - predict \cr
 #' 
 #' There is also the 'ntrial' method, which needs to
 #' be applied to a data.frame. It uses 'MCMCglmm'
@@ -40,6 +41,7 @@
 #' @param method either 'tdist', 'tdist2', 'boot', 'mcmc', 'simulate', 'predict',
 #'               'metafor', 'ntrial' or 'conformal'.
 #' @param m.method method for between-trial variance estimator (used in the 'metafor' package)
+#' @param c.method method for conformal prediction. See ?pred_int_conformal
 #' @param degfr degrees of freedom method default (n.k-2), zdist ("Inf") or "kr" (Kenward-Roger).
 #'              see package 'emmeans'
 #' @param level coverage level with default 0.95
@@ -48,7 +50,8 @@
 #' @param formula formula interface for 'data.frame' methods
 #' @param ... arguments to be passed to a few of the functions
 #' @return a prediction interval for a "new_trial"
-#' @details TODO
+#' @details The main reference to understand the rationale behind this function is \cr
+#' Higgins et al. (2009) A re-evaluation of random-effect meta-analysis
 #' @export
 #' @examples 
 #' \dontrun{
@@ -65,7 +68,8 @@ pred_int <- function(x,
                      interval = c("prediction","confidence"),
                      method = c("tdist","tdist2","boot","mcmc","simulate","predict",
                                 "metafor","ntrial","conformal"),
-                     m.method = "REML", 
+                     m.method = c("REML","DL", "HE", "SJ", "ML", "REML", "EB", "HS", "GENQ"),
+                     c.method = c("quantile","deviation","jackknife"),
                      degfr = c("default","zdist","kr"),
                      level = 0.95,
                      nsim = 500,
@@ -74,41 +78,42 @@ pred_int <- function(x,
   
   interval <- match.arg(interval)
   method <- match.arg(method)
+  m.method <- match.arg(m.method)
   degfr <- match.arg(degfr)
   
-  if(class(x) != "numeric" && 
-     class(x) != "lmerMod" &&
-     class(x) != "MCMCglmm" &&
-     class(x) != "data.frame") stop("object not supported")
+  if(!inherits(x, "numeric") && 
+     !inherits(x, "lmerMod") &&
+     !inherits(x, "MCMCglmm") &&
+     !inherits(x, "data.frame")) stop("object not supported")
   
-  if(class(x) == "lmerMod" && interval == "confidence"){ 
-    stop("not implemented, use confint instead")
+  if(inherits(x, "lmerMod") && interval == "confidence"){ 
+    stop("not implemented, use 'confint' instead")
   }
   
-  if(class(x) == "numeric" && method == "tdist"){
-    ans <- predict(lm(x ~ 1), newdata=data.frame(x = mean(x)), 
-                   interval = interval, level = level)
+  if(inherits(x, "numeric") && method == "tdist"){
+    ans <- predict(lm(x ~ 1), newdata = data.frame(x = mean(x)), interval = interval, level = level)
   }
   
-  if(class(x) == "numeric" && method == "conformal"){
-    ans <- pred_int_conformal(x, level = level, ...)
+  if(inherits(x, "numeric") && method == "conformal"){
+    ans <- pred_int_conformal(x, level = level, method = m.method, ...)
   }
   
-  if(class(x) == "data.frame" && method == "metafor"){
+  if(inherits(x, "data.frame") && method == "metafor"){
     ans <- pred_int_metafor(x, method = m.method, 
-                       var.names = var.names,
-                       level = level,
-                       interval = interval)$pdi
+                            var.names = var.names,
+                            level = level,
+                            interval = interval)$pdi
   }
   
-  if(class(x) == "data.frame" && method == "ntrial"){
+  if(inherits(x, "data.frame") && method == "ntrial"){
     ans <- pred_int_mcg_ntrial(formula = formula, data = x, level = level)
   }
   
-  if(class(x) == "lmerMod" && method == "tdist"){
+  if(inherits(x, "lmerMod") && method == "tdist"){
     ## Extract needed components
     n.k <- x@Gp[2] ## Number of trials
     ## New method for calculating degrees of freedom
+    ## npv = nuiscance parameter value
     t.val <- npv(x, degfr = degfr, level = level)
     ## old method 
     ## alph <- (1 - level)/2
@@ -125,7 +130,7 @@ pred_int <- function(x,
     ans <- as.vector(c(mu, mu.lci, mu.uci))
   }
   
-  if(class(x) == "lmerMod" && method == "tdist2"){
+  if(inherits(x, "lmerMod") && method == "tdist2"){
     ## Extract needed components
     n.k <- x@Gp[2] ## Number of trials
     ## Coming up with weights
@@ -156,7 +161,7 @@ pred_int <- function(x,
     ans <- as.vector(c(mu, mu.lci, mu.uci))
   }
   
-  if(class(x) == "lmerMod" && method == "boot"){
+  if(inherits(x, "lmerMod") && method == "boot"){
     tmp <- suppressWarnings(bootMer(x, 
                                     nsim = nsim, 
                                     pred_int, 
@@ -164,11 +169,11 @@ pred_int <- function(x,
     ans <- colMeans(tmp)
   }
  
-  if(class(x) == "MCMCglmm" && method == "tdist"){
+  if(inherits(x, "MCMCglmm") && method == "tdist"){
     ans <- pred_int_mcg_tdist(x, level = level)
   }
   
-  if(class(x) == "MCMCglmm" && method == "mcmc"){
+  if(inherits(x, "MCMCglmm") && method == "mcmc"){
     mu.chain <- as.vector(x$Sol[,1])
     tau.chain <- sqrt(as.vector(x$VCV[,1]))
     err.chain <- rnorm(length(mu.chain), 0, tau.chain)
@@ -177,7 +182,7 @@ pred_int <- function(x,
     ans <- mu.pi
   }
   
-  if(class(x) == "MCMCglmm" && method == "simulate"){
+  if(inherits(x, "MCMCglmm") && method == "simulate"){
     ## Extract number of effective samples
     nrs <- nrow(as.matrix(x$Sol))
     ndat <- data.frame(lrr = rep(0,nrs), 
@@ -189,7 +194,7 @@ pred_int <- function(x,
     ans <- quantile(prdi.c.mu, probs = c(0.5, 0.025,0.975))
   }
   
-  if(class(x) == "MCMCglmm" && method == "predict"){
+  if(inherits(x, "MCMCglmm") && method == "predict"){
     ## I will assume the pr = TRUE when the model was ran
     ## It is assumed that there is a factor called 'Trial_ID'
     if(as.character(x$Random$formula)[2] != "Trial_ID")
@@ -208,13 +213,9 @@ pred_int <- function(x,
                             interval = interval))
   }
   
-  names(ans) <- c("fit","lwr","upr")
+  setNames(ans, c("fit","lwr","upr"))
   return(ans)
 }
-
-
-
-
 
 
 

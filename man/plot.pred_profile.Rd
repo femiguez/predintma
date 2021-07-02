@@ -4,8 +4,7 @@
 \alias{plot.pred_profile}
 \title{plot.pred_profile}
 \usage{
-\method{plot}{pred_profile}(x, max.prob = TRUE, main = NULL,
-  max.prob.col = "blue")
+\method{plot}{pred_profile}(x, max.prob = TRUE, main = NULL, max.prob.col = "blue")
 }
 \arguments{
 \item{max.prob}{logical whether to plot the optmiized maximum probability}

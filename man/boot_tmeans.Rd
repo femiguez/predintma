@@ -4,8 +4,15 @@
 \alias{boot_tmeans}
 \title{Bootstrap distribution of trial means}
 \usage{
-boot_tmeans(formula = NULL, data, R = 500, var.names = c("y",
-  "trial"), ci.type = "basic", level = 0.95, ncpus = 1)
+boot_tmeans(
+  formula = NULL,
+  data,
+  R = 500,
+  var.names = c("y", "trial"),
+  ci.type = "basic",
+  level = 0.95,
+  ncpus = 1
+)
 }
 \arguments{
 \item{formula}{standard R formula of the form response ~ trial}

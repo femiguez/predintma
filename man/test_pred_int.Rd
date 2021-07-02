@@ -4,8 +4,15 @@
 \alias{test_pred_int}
 \title{test_pred_int}
 \usage{
-test_pred_int(formula, data, method = c("tdist", "ntrial", "jags",
-  "boot"), level = 0.95, iter = 1, quiet = TRUE, ...)
+test_pred_int(
+  formula,
+  data,
+  method = c("tdist", "ntrial", "jags", "boot"),
+  level = 0.95,
+  iter = 1,
+  quiet = FALSE,
+  ...
+)
 }
 \arguments{
 \item{formula}{standard R formula, 'response ~ trial'}
@@ -18,7 +25,7 @@ test_pred_int(formula, data, method = c("tdist", "ntrial", "jags",
 
 \item{iter}{number of iterations}
 
-\item{quiet}{logical. TRUE by default}
+\item{quiet}{logical. FALSE by default}
 
 \item{...}{additional arguments to be passed to the functions}
 }

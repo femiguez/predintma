@@ -4,9 +4,14 @@
 \alias{mpdi_obj}
 \title{objective function for probability of a prediciton interval for 'small' sample sizes.}
 \usage{
-mpdi_obj(alpha, x, method = c("tdist", "conformal"),
+mpdi_obj(
+  alpha,
+  x,
+  method = c("tdist", "conformal"),
   m.method = c("quantile", "deviation", "jackknife"),
-  alpha.penalty = 0, scale = FALSE)
+  alpha.penalty = 0,
+  scale = FALSE
+)
 }
 \arguments{
 \item{alpha}{miscoverage or 'error rate'}

@@ -4,8 +4,13 @@
 \alias{pred_int_metafor}
 \title{Prediction interval for a data.frame assuming effect size 'ROM' and 'metafor' package}
 \usage{
-pred_int_metafor(x, method = "REML", interval = c("prediction",
-  "confidence"), var.names = c("trt", "ctrl", "ID"), level = 0.95)
+pred_int_metafor(
+  x,
+  method = "REML",
+  interval = c("prediction", "confidence"),
+  var.names = c("trt", "ctrl", "ID"),
+  level = 0.95
+)
 }
 \arguments{
 \item{x}{should be an object of class "data.frame"}

@@ -6,7 +6,7 @@
 #' @param method either 'tdist', 'ntrial', 'jags' or 'boot'
 #' @param level prediction level
 #' @param iter number of iterations
-#' @param quiet logical. TRUE by default
+#' @param quiet logical. FALSE by default
 #' @param ... additional arguments to be passed to the functions
 #' @export
 #' @examples 
@@ -21,7 +21,7 @@
 
 test_pred_int <- function(formula, data, 
                           method = c("tdist","ntrial","jags","boot"), 
-                          level=0.95, iter = 1, quiet = TRUE, ...){
+                          level=0.95, iter = 1, quiet = FALSE, ...){
   
   ## First: extract variables
   if(!missing(formula)) var.names <- all.vars(as.formula(formula))
@@ -53,13 +53,13 @@ test_pred_int <- function(formula, data,
         pdi <- pred_int(fit, level = level)
       }
       if(method == "ntrial"){
-        pdi <- pred_int_mcg_ntrial(formula = y ~ trial, data = xm1, level = level)
+        pdi <- pred_int_mcg_ntrial(formula = y ~ trial, data = xm1, level = level,...)
       }
       if(method == "jags"){
-        pdi <- pred_int_jags(y ~ trial, data = xm1, level = level, quiet = TRUE, return = "pdi")
+        pdi <- pred_int_jags(y ~ trial, data = xm1, level = level, quiet = TRUE, return = "pdi",...)
       }
       if(method == "boot"){
-        pdi <- pred_int_boot(y ~ trial, data = xm1, level = level)
+        pdi <- pred_int_boot(y ~ trial, data = xm1, level = level,...)
       }
       ## Does it include the one that we left out?
       inc[j] <- includes(loo, pdi[2], pdi[3])

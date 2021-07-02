@@ -4,11 +4,20 @@
 \alias{pred_int}
 \title{Prediction interval for different objects}
 \usage{
-pred_int(x, interval = c("prediction", "confidence"),
-  method = c("tdist", "tdist2", "boot", "mcmc", "simulate", "predict",
-  "metafor", "ntrial", "conformal"), m.method = "REML",
-  degfr = c("default", "zdist", "kr"), level = 0.95, nsim = 500,
-  var.names = NULL, formula = NULL, ...)
+pred_int(
+  x,
+  interval = c("prediction", "confidence"),
+  method = c("tdist", "tdist2", "boot", "mcmc", "simulate", "predict", "metafor",
+    "ntrial", "conformal"),
+  m.method = c("REML", "DL", "HE", "SJ", "ML", "REML", "EB", "HS", "GENQ"),
+  c.method = c("quantile", "deviation", "jackknife"),
+  degfr = c("default", "zdist", "kr"),
+  level = 0.95,
+  nsim = 500,
+  var.names = NULL,
+  formula = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{should be an object of class: "numeric", "data.frame", "lmerMod" or "MCMCglmm"}
@@ -19,6 +28,8 @@ pred_int(x, interval = c("prediction", "confidence"),
 'metafor', 'ntrial' or 'conformal'.}
 
 \item{m.method}{method for between-trial variance estimator (used in the 'metafor' package)}
+
+\item{c.method}{method for conformal prediction. See ?pred_int_conformal}
 
 \item{degfr}{degrees of freedom method default (n.k-2), zdist ("Inf") or "kr" (Kenward-Roger).
 see package 'emmeans'}
@@ -46,23 +57,24 @@ As defined in Higgins et al. (2009) it considers the parameteric uncertainty
 and the between study uncertainty, but there is more to this...
 Implemented cases:
 
-object = numeric \cr
-object = lmerMod \cr
-object = MCMCglmm \cr
-object = data.frame \cr
+object of class 'numeric' \cr
+object of class 'lmerMod' \cr
+object of class 'MCMCglmm' \cr
+object of class 'data.frame' \cr
 
-For object = numeric the method is based on the 'lm' function
+For object of class numeric method t-dist is based on the 'lm' function and predict
+There is also a method based on conformal prediction. See 'pred_int_conformal'
 
-For object = 'lmerMod' there are three methods:
-- tdist
-- tdist2
-- boot
+For object of class 'lmerMod' there are three methods: \cr
+- tdist \cr
+- tdist2 \cr
+- boot (uses lme4::bootMer) \cr
 
-For object = 'MCMCglmm' there are four methods:
-- tdist
-- mcmc
-- simulate
-- predict
+For object of class 'MCMCglmm' there are four methods: \cr
+- tdist \cr
+- mcmc \cr
+- simulate \cr
+- predict \cr
 
 There is also the 'ntrial' method, which needs to
 be applied to a data.frame. It uses 'MCMCglmm'
@@ -74,7 +86,8 @@ the degrees of freedom argument (degfr) allows
 for different methods other than n.k-2
 Calculate prediction intervals for a variety of objects
 
-TODO
+The main reference to understand the rationale behind this function is \cr
+Higgins et al. (2009) A re-evaluation of random-effect meta-analysis
 }
 \examples{
 \dontrun{

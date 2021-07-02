@@ -4,7 +4,7 @@
 \alias{pred_int_boot}
 \title{Bootstrap-based prediction intervals}
 \usage{
-pred_int_boot(formula, data, level = 0.95, R = 500, ncpus = 1)
+pred_int_boot(formula, data, level = 0.95, R = 500, ncpus = 1, ...)
 }
 \arguments{
 \item{formula}{standard R formula of the form response ~ trial}

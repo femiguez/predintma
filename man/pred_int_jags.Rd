@@ -4,21 +4,30 @@
 \alias{pred_int_jags}
 \title{pred_int_jags}
 \usage{
-pred_int_jags(formula, data, df = 1, level = 0.95, quiet = FALSE,
-  return = c("pdi", "all"))
+pred_int_jags(
+  formula,
+  data,
+  df = NA,
+  level = 0.95,
+  quiet = FALSE,
+  return = c("pdi", "all"),
+  ...
+)
 }
 \arguments{
 \item{formula}{standard R formula response ~ trial}
 
 \item{data}{data frame}
 
-\item{df}{degrees of freedom for the t-distribution. If 'NA' it will be treated as a nuisance parameter}
+\item{df}{degrees of freedom for the t-distribution. If 'NA' it will be treated as a nuisance parameter (default)}
 
 \item{level}{probability level}
 
 \item{quiet}{whether to display progress of sampling}
 
 \item{return}{type of information to return either 'pdi' just the prediction interval or 'all' which include the output from the model and Gelman diagnostics}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 prediction interval (or more detail)

@@ -4,8 +4,7 @@
 \alias{pred_int_jb}
 \title{Prediction Interval for Random-effects Meta-analysis, which uses a combination of Jackknife and Bootstrap}
 \usage{
-pred_int_jb(formula, data, level = 0.95, iter = 10, R = 50,
-  var.names = NULL)
+pred_int_jb(formula, data, level = 0.95, iter = 10, R = 50, var.names = NULL)
 }
 \arguments{
 \item{formula}{standard formula with response ~ trial}
