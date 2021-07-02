@@ -83,5 +83,5 @@
 "soyprx"
 
  #' Import packages needed for predintma to work correctly
- #' @import boot coda emmeans knitr lme4 metafor MCMCglmm parallel rjags stats
+ #' @import boot coda emmeans knitr lme4 metafor MCMCglmm parallel stats
  NULL
